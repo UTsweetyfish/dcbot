@@ -8,6 +8,7 @@ from os.path import isdir
 import re
 from shutil import copytree, rmtree
 import subprocess
+from sys import argv
 from tempfile import mkdtemp
 
 from debian.deb822 import Deb822, Sources
@@ -49,11 +50,12 @@ def gen_pr_body(old: str, new: str):
     new_changelog = Changelog(open(f'{new}/debian/changelog'))
 
     body = ''
+    body += '## Basic Information\n'
     body += f'Old Version: {old_changelog.full_version}\n'
     body += f'New Version: {new_changelog.full_version}\n'
     
     old_native = '-' not in old_changelog.full_version
-    new_native = '-' not in old_changelog.full_version
+    new_native = '-' not in new_changelog.full_version
 
     if old_native != new_native:
         body += 'Upstream changed it\'s package formats. Previous: '
@@ -72,6 +74,8 @@ def gen_pr_body(old: str, new: str):
     old_package_list = [binary_section['Package'] for binary_section in old_control[1:]]
     new_package_list = [binary_section['Package'] for binary_section in new_control[1:]]
     for package in old_package_list:
+        if package == 'template-repository':
+            continue
         if package not in new_package_list:
             if not potential_transition:
                 potential_transition = True
@@ -96,22 +100,27 @@ def gen_pr_body(old: str, new: str):
     
     return body
 
+# 1a bash
+# 1b bash/unstable
+# 2 https://ftp.debian.org/debian/pool/main/b/bash/bash_5.2.21-2.dsc
+# package_with_suite_or_url = 'sympy'
 
-def main():
+# 1 '' -> dcbot-version
+# 2a 'custom'
+# 2b 'topic-topicname'
+# branch = ''
 
-    # 1a bash
-    # 1b bash/unstable
-    # 2 https://ftp.debian.org/debian/pool/main/b/bash/bash_5.2.21-2.dsc
-    package_with_suite_or_url = 'sympy'
+# Defaults to packagename
+# github_project_name = '' # https://github.com/deepin-community/""blablabla""
 
-    # 1 '' -> dcbot-version
-    # 2a 'custom'
-    # 2b 'topic-topicname'
-    branch = ''
+# requester = '@UTSweetyfish'
 
-    # Defaults to packagename
-    github_project_name = '' # https://github.com/deepin-community/""blablabla""
-
+def update(
+    package_with_suite_or_url: str,
+    branch: str,
+    github_project_name: str,
+    requester: str
+    ):
 
     m_url = re.search(r"^https?://.*/(.*?\.dsc)$", package_with_suite_or_url)
     m_p_with_s = re.search(r"^([a-z0-9][a-z0-9+\-.]+)(?:/([a-z]+))?$", package_with_suite_or_url)
@@ -283,7 +292,7 @@ def main():
 
     ])
 
-    input(f'Will push to origin:{branch}. Continue?')
+    # input(f'Will push to origin:{branch}. Continue?')
 
     # FIXME: DO NOT FORCE PUSH IN PRODUCTION
     subprocess.check_output([
@@ -297,9 +306,12 @@ def main():
 
     pr_body = gen_pr_body('GIT.OLD', 'GIT.NEW')
 
-    # print(branch)
-    # print(pr_title)
-    # print(pr_body)
+    pr_body = f'This pull request is requested by {requester}\n' + pr_body
+
+    print(f'Will create a pull request from {branch} to master')
+    print(pr_title)
+    print(pr_body)
+    # input('Press Enter to create pull request...')
 
     r = requests.post(f'https://api.github.com/repos/deepin-community/{github_project_name}/pulls',
         headers={
@@ -318,5 +330,22 @@ def main():
     # print(r.text)
     r.raise_for_status()
 
+def main():
+    package = argv[1]
+    branch = argv[2]
+    github_project_name = argv[3]
+    requester = argv[4]
+    if branch == '-': branch = ''
+    if github_project_name == '-': github_project_name = ''
+
+    if branch:
+        assert branch.startswith('topic-')
+    if requester and requester[0] != '@':
+        requester = '@' + requester
+    # assert requester in [
+    #     '@UTSweetyfish'
+    # ]
+    
+    update(package, branch, github_project_name, requester)
 if __name__ == '__main__':
     main()
