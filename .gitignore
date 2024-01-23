@@ -1,0 +1,4 @@
+venv/
+*.pem
+cache.pkl
+config.ini
