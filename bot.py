@@ -100,12 +100,11 @@ async def message_callback(room: MatrixRoom, event: Event) -> None:
             packages += args[2:]
     if packages:
         for package in packages:
-            try:
-                subprocess.check_output([
-                    'python', 'main.py', package, topic, '', requester
-                ], text=True)
-            except:
-                continue
+            r = subprocess.run([
+                'python', 'main.py', package, topic, '', requester
+            ], capture_output=True, text=True)
+            stdout = r.stdout
+            stderr = r.stderr
 
 async def main() -> None:
     # If there are no previously-saved credentials, we'll use the password
@@ -157,7 +156,7 @@ async def main() -> None:
         client.device_id = config["device_id"]
 
         # Now we can send messages as the user
-        room_id = "#deepin-sig-sysdev-team"
+        # room_id = "#deepin-sig-sysdev-team"
         
 
         # print("Logged in using stored credentials. Sent a test message.")
