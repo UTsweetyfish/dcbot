@@ -10,9 +10,10 @@ from shutil import copytree, rmtree
 import subprocess
 from sys import argv
 from tempfile import mkdtemp
+from types import NoneType
 
 from debian.deb822 import Deb822, Sources
-from debian.debian_support import Version
+from debian.debian_support import Version, version_compare
 from debian.changelog import Changelog
 
 import requests
@@ -119,7 +120,7 @@ def update(
     package_with_suite_or_url: str,
     branch: str,
     github_project_name: str,
-    requester: str
+    requester: str | NoneType = None
     ):
 
     m_url = re.search(r"^https?://.*/(.*?\.dsc)$", package_with_suite_or_url)
@@ -130,6 +131,8 @@ def update(
     # Shouldn't match both
     assert not (m_url and m_p_with_s)
 
+    if requester:
+        assert requester.startswith('@')
     suite = ''
 
     if m_p_with_s:
@@ -193,7 +196,15 @@ def update(
             shell=True, text=True
         )
 
-        s = Sources(sources)
+        # True?
+        _sources = Sources.iter_paragraphs(sources)
+        s = Sources()
+        for _source in _sources:
+            if not s:
+                s = _source
+                continue
+            if version_compare(_source['Version'], s['Version']) > 0:
+                s = _source
 
         if not branch:
             branch = mangle(f'dcbot/debian/{upstream_version(s["Version"])}')
@@ -306,7 +317,8 @@ def update(
 
     pr_body = gen_pr_body('GIT.OLD', 'GIT.NEW')
 
-    pr_body = f'This pull request is requested by {requester}\n' + pr_body
+    if requester:
+        pr_body = f'This pull request is requested by {requester}.\n' + pr_body
 
     print(f'Will create a pull request from {branch} to master')
     print(pr_title)
