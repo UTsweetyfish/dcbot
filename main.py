@@ -5,6 +5,7 @@ import glob
 from os import chdir, mkdir
 import os
 from os.path import isdir
+from pathlib import Path
 import re
 from shutil import copytree, rmtree
 import subprocess
@@ -147,7 +148,10 @@ def update(
         assert suite in ['unstable', 'experimental']
 
     # pylint: disable=W0603
-    workdir = mkdtemp(prefix='dcbot.')
+    # workdir = mkdtemp(prefix='dcbot.')
+    _tmpdir = Path.home() / '.cache' / 'dcbot'
+    _tmpdir.mkdir(parents=True, exist_ok=True)
+    workdir = mkdtemp(prefix='dcbot.', dir=_tmpdir)
     print(f'Working directory: {workdir}')
     # clean workdir atexit
     atexit.register(cleanup, workdir)
