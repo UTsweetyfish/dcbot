@@ -326,7 +326,7 @@ def update(
 
     chdir('..')
 
-    pr_title = '[DCBOT-TEST] ' + commit_message
+    pr_title = commit_message
     # pr_title = 'update'
 
     pr_body = gen_pr_body('GIT.OLD', 'GIT.NEW')
@@ -350,6 +350,7 @@ def update(
             'head': branch,
             'title': pr_title,
             'body': pr_body,
+            'draft': True,
         }, timeout=5
     )
     # print(r.request)
