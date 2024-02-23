@@ -124,6 +124,11 @@ def update(
     requester: str | NoneType = None
     ):
 
+    # Avoid writing to master
+    # Checked here since generated branch name should never be 'master' or 'main'
+    assert branch != 'master'
+    assert branch != 'main'
+
     m_url = re.search(r"^https?://.*/(.*?\.dsc)$", package_with_suite_or_url)
     m_p_with_s = re.search(r"^([a-z0-9][a-z0-9+\-.]+)(?:/([a-z]+))?$", package_with_suite_or_url)
 
@@ -162,7 +167,6 @@ def update(
     chdir('SOURCE')
 
     # 1. Infer github_project_name
-    # 2. Infer branch
 
     if m_url:
         url = m_url.group(0)
@@ -172,8 +176,6 @@ def update(
         package_name = s['Source']
         if not github_project_name:
             github_project_name = s['Source']
-        if not branch:
-            branch = mangle(upstream_version(s['Version']))
     elif m_p_with_s:
         # apt source --download-only bash/sid
         package_name = m_p_with_s.group(1)
@@ -210,19 +212,19 @@ def update(
             if version_compare(_source['Version'], s['Version']) > 0:
                 s = _source
 
-        if not branch:
-            branch = mangle(f'dcbot/debian/{upstream_version(s["Version"])}')
     else:
         # Should not reach here
         assert False
 
+    # branch should not be infered here since
+    # s["Version"] here is not 100% accurate.
+    # if not branch:
+    #     branch = mangle(f'dcbot/debian/{upstream_version(s["Version"])}')
 
-    assert branch
+    # assert branch
     assert github_project_name
     assert package_name
-    # Avoid writing to master
-    assert branch != 'master'
-    assert branch != 'main'
+
     # load github token here
 
     chdir('..')
@@ -262,6 +264,14 @@ def update(
     ])
     chdir('..')
     chdir('GIT.NEW')
+
+    # Infer branch here
+    if not branch:
+        with open('debian/changelog') as f:
+            # bash (5.2-3) unstable; urgency=medium
+            version = f.readline().split()[1][1:-1]
+            branch = mangle(f'dcbot/debian/{upstream_version(version)}')
+
     # delete .github in NEW
     # delete .pc in NEW
     subprocess.check_output([
@@ -300,7 +310,7 @@ def update(
         'git config user.email 156989552+deepin-community-bot[bot]@users.noreply.github.com',
         shell=True
     )
-    commit_message = f'feat: update {package_name} to {s["Version"]}'
+    commit_message = f'feat: update {package_name} to {version}'
 
     subprocess.check_output([
         'git', 'commit', '-m', commit_message
