@@ -266,10 +266,10 @@ def update(
     chdir('GIT.NEW')
 
     # Infer branch here
-    if not branch:
-        with open('debian/changelog') as f:
-            # bash (5.2-3) unstable; urgency=medium
-            version = f.readline().split()[1][1:-1]
+    with open('debian/changelog') as f:
+        # bash (5.2-3) unstable; urgency=medium
+        version = f.readline().split()[1][1:-1]
+        if not branch:
             branch = mangle(f'dcbot/debian/{upstream_version(version)}')
 
     # delete .github in NEW
