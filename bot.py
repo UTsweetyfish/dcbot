@@ -24,6 +24,7 @@ REQUESTER_MAP = {
     '@yukari:ewe.moe': 'YukariChiba',
     '@telegram_283338155:t2bot.io': 'YukariChiba',
     '@telegram_310653493:t2bot.io': 'RevySR',
+    '@avenger_285714:matrix.org': 'Avenger-285714',
 }
 
 # Check out main() below to see how it's done.
