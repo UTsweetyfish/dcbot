@@ -101,7 +101,7 @@ async def message_callback(room: MatrixRoom, event: Event) -> None:
     if packages:
         for package in packages:
             r = subprocess.run([
-                'python', 'main.py', package, topic, '', requester
+                'python', 'update.py', package, topic, '', requester
             ], capture_output=True, text=True)
             stdout = r.stdout
             stderr = r.stderr

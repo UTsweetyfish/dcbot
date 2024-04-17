@@ -250,7 +250,7 @@ def update(
     elif m_p_with_s:
         subprocess.check_output(
             [
-                'apt', 'source', '--download-only', f'{package_name}/{suite}'
+                'apt', 'source', '--download-only', '--only-source', f'{package_name}/{suite}'
             ]
         )
 
