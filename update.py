@@ -55,7 +55,7 @@ def gen_pr_body(old: str, new: str):
     body += '## Basic Information\n'
     body += f'Old Version: {old_changelog.full_version}\n'
     body += f'New Version: {new_changelog.full_version}\n'
-    
+
     old_native = '-' not in old_changelog.full_version
     new_native = '-' not in new_changelog.full_version
 
@@ -69,7 +69,7 @@ def gen_pr_body(old: str, new: str):
     if 'dde' in old_changelog.full_version or \
         'deepin' in old_changelog.full_version:
         body += 'Old version may contain dde / deepin patches. Please review more precisely.\n'
-    
+
     body += '\n'
 
     potential_transition = False
@@ -91,15 +91,20 @@ def gen_pr_body(old: str, new: str):
         old_series = open(f'{old}/debian/patches/series').readlines()
     if os.path.exists(f'{new}/debian/patches/series'):
         new_series = open(f'{new}/debian/patches/series').readlines()
-    
-    d = difflib.unified_diff(old_series, new_series, 'a/debian/patches/series', 'b/debian/patches/series')
+
+    d = difflib.unified_diff(
+        old_series,
+        new_series,
+        'a/debian/patches/series',
+        'b/debian/patches/series'
+    )
     d = ''.join(d)
     if d.strip():
         body += '## Patch series\n'
         body += '```diff\n'
         body += d
         body += '```'
-    
+
     return body
 
 # 1a bash
@@ -362,8 +367,10 @@ def main():
     branch = argv[2]
     github_project_name = argv[3]
     requester = argv[4]
-    if branch == '-': branch = ''
-    if github_project_name == '-': github_project_name = ''
+    if branch == '-':
+        branch = ''
+    if github_project_name == '-':
+        github_project_name = ''
 
     if branch:
         assert branch.startswith('topic-')
@@ -372,7 +379,7 @@ def main():
     # assert requester in [
     #     '@UTSweetyfish'
     # ]
-    
+
     update(package, branch, github_project_name, requester)
 if __name__ == '__main__':
     main()

@@ -55,7 +55,7 @@ def write_details_to_disk(resp: LoginResponse, homeserver) -> None:
 
 async def message_callback(room: MatrixRoom, event: Event) -> None:
     assert isinstance(event, RoomMessageText)
-    
+
     # deepin-sysdev-team
     if room.room_id != '!arcYMpuEJhIvmonMaG:matrix.org':
         return
@@ -71,7 +71,7 @@ async def message_callback(room: MatrixRoom, event: Event) -> None:
 
     if event.body[0] != '/':
         print('Not a command, ignored.')
-    
+
     command = event.body.split()[0]
     # (package, branch, github_project_name, requester)
     packages = []
@@ -120,8 +120,8 @@ async def message_callback(room: MatrixRoom, event: Event) -> None:
             r = subprocess.run([
                 'python', 'update.py', package, topic, '', requester
             ], capture_output=True, text=True)
-            stdout = r.stdout
-            stderr = r.stderr
+            # stdout = r.stdout
+            # stderr = r.stderr
 
 async def main() -> None:
     # If there are no previously-saved credentials, we'll use the password
@@ -175,7 +175,7 @@ async def main() -> None:
 
         # Now we can send messages as the user
         # room_id = "#deepin-sig-sysdev-team"
-        
+
 
         # print("Logged in using stored credentials. Sent a test message.")
         # print(await client.join(room_id))
