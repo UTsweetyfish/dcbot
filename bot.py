@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 
 import aiofiles
 
@@ -75,6 +76,21 @@ async def message_callback(room: MatrixRoom, event: Event) -> None:
     # (package, branch, github_project_name, requester)
     packages = []
     topic = ''
+
+    if command in ['/update', '/batchupdate']:
+        try:
+            if int(open('LAST-UPDATED').read().strip()) < time.time() - 60 * 60:
+                # TODO: warning
+                # LAST-UPDATED fails more than 1 hours ago
+                # Is apt-get down?
+                pass
+            else:
+                # ok to go
+                pass
+        except OSError:
+            # TODO: warning
+            # LAST-UPDATED does not present
+            pass
     match command:
         case "/update":
             # no branch
@@ -147,6 +163,7 @@ async def main() -> None:
     # Otherwise the config file exists, so we'll use the stored credentials
     else:
         # open the file in read-only mode
+        print(f'Loading config file from {CONFIG_FILE}...')
         async with aiofiles.open(CONFIG_FILE, "r") as f:
             contents = await f.read()
         config = json.loads(contents)
@@ -163,7 +180,7 @@ async def main() -> None:
         # print("Logged in using stored credentials. Sent a test message.")
         # print(await client.join(room_id))
         # print(await client.room_send(
-        #     room_id,
+        #     '!arcYMpuEJhIvmonMaG:matrix.org',
         #     message_type="m.room.message",
         #     content={"msgtype": "m.text", "body": "Hello world!"},
         # ))

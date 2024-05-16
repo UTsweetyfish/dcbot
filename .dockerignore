@@ -1,0 +1,8 @@
+.git/
+Dockerfile
+config.example.ini
+config.ini
+credentials.json
+venv/
+*.pem
+cache.pkl
