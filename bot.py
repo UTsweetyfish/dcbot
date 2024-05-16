@@ -65,7 +65,7 @@ async def message_callback(room: MatrixRoom, event: Event) -> None:
     requester = REQUESTER_MAP[event.sender]
 
     print(
-        f"Message received in room {room.display_name} ({room.room_id})\n"
+        f"Message received in room {room.display_name} ({room.room_id}) ({event.event_id})\n"
         f"{room.user_name(event.sender)} ({event.sender}) | {event.body}"
     )
 
@@ -182,7 +182,15 @@ async def main() -> None:
         # print(await client.room_send(
         #     '!arcYMpuEJhIvmonMaG:matrix.org',
         #     message_type="m.room.message",
-        #     content={"msgtype": "m.text", "body": "Hello world!"},
+        #     content={
+        #         "msgtype": "m.text",
+        #         "body": "Hello world!",
+        #         "m.relates_to": {
+        #             "m.in_reply_to": {
+        #                 "event_id": "$eventId0123456789ABCDEFabcdef0123456789AB"
+        #             }
+        #         }
+        #     },
         # ))
         client.add_event_callback(message_callback, RoomMessageText)
         await client.sync_forever(timeout=30000)  # milliseconds
