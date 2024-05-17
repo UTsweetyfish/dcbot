@@ -142,13 +142,19 @@ async def message_callback(room: MatrixRoom, event: Event) -> None:
                 return
             packages += args[2:]
     if packages:
+
+        results = []
         for package in packages:
             print(f'Updating {package}')
-            r = subprocess.run([
-                'python', 'update.py', package, topic, '', requester
-            ], capture_output=True, text=True)
-            # stdout = r.stdout
-            # stderr = r.stderr
+            p = asyncio.create_subprocess_exec(
+                'python', 'update.py', package, topic, '', requester,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            results.append(p)
+
+        results = await asyncio.gather(*results)
+
         await client.room_send(
             room.room_id,
             message_type="m.room.message",
@@ -163,6 +169,7 @@ async def message_callback(room: MatrixRoom, event: Event) -> None:
             }
         )
 async def main() -> None:
+    # TODO: OOP
     global client
     # If there are no previously-saved credentials, we'll use the password
     if not os.path.exists(CONFIG_FILE):

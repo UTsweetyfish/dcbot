@@ -50,12 +50,12 @@ def installation_token() -> str:
         o = pickle.load(open(f'{_curdir}/cache.pkl', 'rb'))
     except Exception:
         o = None
-    
+
     if o:
         exp = datetime.fromisoformat(o['expires_at'])
         if datetime.utcnow().replace(tzinfo=ZoneInfo('UTC')) + timedelta(minutes=30) > exp:
             o = None
-    
+
     if o:
         print('Using cached token...')
     else:
