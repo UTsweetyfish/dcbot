@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 import time
+from types import NoneType
 
 import aiofiles
 
@@ -27,6 +28,8 @@ REQUESTER_MAP = {
     '@telegram_310653493:t2bot.io': 'RevySR',
     '@avenger_285714:matrix.org': 'Avenger-285714',
 }
+
+client: AsyncClient | NoneType = None
 
 # Check out main() below to see how it's done.
 
@@ -54,8 +57,8 @@ def write_details_to_disk(resp: LoginResponse, homeserver) -> None:
 
 
 async def message_callback(room: MatrixRoom, event: Event) -> None:
+    assert client
     assert isinstance(event, RoomMessageText)
-
     # deepin-sysdev-team
     if room.room_id != '!arcYMpuEJhIvmonMaG:matrix.org':
         return
@@ -65,7 +68,7 @@ async def message_callback(room: MatrixRoom, event: Event) -> None:
     requester = REQUESTER_MAP[event.sender]
 
     print(
-        f"Message received in room {room.display_name} ({room.room_id}) ({event.event_id})\n"
+        f"Message received in room {room.display_name} ({room.room_id})\n"
         f"{room.user_name(event.sender)} ({event.sender}) | {event.body}"
     )
 
@@ -80,17 +83,40 @@ async def message_callback(room: MatrixRoom, event: Event) -> None:
     if command in ['/update', '/batchupdate']:
         try:
             if int(open('LAST-UPDATED').read().strip()) < time.time() - 60 * 60:
-                # TODO: warning
                 # LAST-UPDATED fails more than 1 hours ago
                 # Is apt-get down?
-                pass
+                await client.room_send(
+                    room.room_id,
+                    message_type="m.room.message",
+                    content={
+                        "msgtype": "m.text",
+                        "body": "LAST-UPDATED fails more than 1 hours ago. Is apt-get down?",
+                        "m.relates_to": {
+                            "m.in_reply_to": {
+                                "event_id": event.event_id
+                            }
+                        }
+                    }
+                )
+                return
             else:
-                # ok to go
                 pass
         except OSError:
-            # TODO: warning
             # LAST-UPDATED does not present
-            pass
+            await client.room_send(
+                room.room_id,
+                message_type="m.room.message",
+                content={
+                    "msgtype": "m.text",
+                    "body": "LAST-UPDATED not found.",
+                    "m.relates_to": {
+                        "m.in_reply_to": {
+                            "event_id": event.event_id
+                        }
+                    }
+                }
+            )
+            return
     match command:
         case "/update":
             # no branch
@@ -117,13 +143,27 @@ async def message_callback(room: MatrixRoom, event: Event) -> None:
             packages += args[2:]
     if packages:
         for package in packages:
+            print(f'Updating {package}')
             r = subprocess.run([
                 'python', 'update.py', package, topic, '', requester
             ], capture_output=True, text=True)
             # stdout = r.stdout
             # stderr = r.stderr
-
+        await client.room_send(
+            room.room_id,
+            message_type="m.room.message",
+            content={
+                "msgtype": "m.text",
+                "body": "Done.",
+                "m.relates_to": {
+                    "m.in_reply_to": {
+                        "event_id": event.event_id
+                    }
+                }
+            }
+        )
 async def main() -> None:
+    global client
     # If there are no previously-saved credentials, we'll use the password
     if not os.path.exists(CONFIG_FILE):
         print(

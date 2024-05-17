@@ -1,17 +1,30 @@
 FROM debian:unstable-slim
 
 RUN echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list && \
-    apt-get update && apt-get install -y --no-install-recommends \
-    python3-wheel \
+    apt-get update && apt-get -y dist-upgrade && \
+    apt-get install -y --no-install-recommends \
+    dctrl-tools \
+    devscripts \
+    dpkg-dev \
+    git \
+    python3-apt \
+    python3-debian \
     python3-pip \
-    python3-venv
+    python3-venv \
+    python3-wheel \
+    wget
 
 
 ENV PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /app
-RUN python3 -m venv /app/venv && \
-    /app/venv/bin/pip install -U matrix-nio aiofiles
+RUN python3 -m venv --system-site-packages /app/venv && \
+    /app/venv/bin/pip install -U \
+    aiofiles \
+    cryptography \
+    matrix-nio \
+    PyJWT \
+    requests
 
 ENV PATH="/app/venv/bin/:$PATH"
 ENV PYTHONUNBUFFERED=1
