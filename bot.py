@@ -82,7 +82,7 @@ async def message_callback(room: MatrixRoom, event: Event) -> None:
 
     if command in ['/update', '/batchupdate']:
         try:
-            if int(open('LAST-UPDATED').read().strip()) < time.time() - 60 * 60:
+            if int(open('LAST-UPDATED').read().strip()) < time.time() - 2 * 60 * 60:
                 # LAST-UPDATED fails more than 1 hours ago
                 # Is apt-get down?
                 await client.room_send(
@@ -90,7 +90,7 @@ async def message_callback(room: MatrixRoom, event: Event) -> None:
                     message_type="m.room.message",
                     content={
                         "msgtype": "m.text",
-                        "body": "LAST-UPDATED fails more than 1 hours ago. Is apt-get down?",
+                        "body": "LAST-UPDATED fails more than 2 hours ago. Is apt-get down?",
                         "m.relates_to": {
                             "m.in_reply_to": {
                                 "event_id": event.event_id

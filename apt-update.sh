@@ -18,11 +18,11 @@ while true ; do
     if ! apt-get update; then
         echo "apt-get update failed. Retrying in 10 minutes..."
         echo "--------------------------------"
-        sleep 1m
+        sleep 10m
     else
         echo "apt-get update succeeded."
         echo "--------------------------------"
         date '+%s' > LAST-UPDATED
-        sleep 5m
+        sleep 1h
     fi
 done

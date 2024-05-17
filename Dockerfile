@@ -1,4 +1,5 @@
-FROM debian:unstable-slim
+# FROM debian:unstable-slim
+FROM debian:testing-slim
 
 RUN echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list && \
     apt-get update && apt-get -y dist-upgrade && \
