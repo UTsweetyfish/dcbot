@@ -4,9 +4,8 @@ import asyncio
 import getpass
 import json
 import os
-import subprocess
 import sys
-import time
+
 from types import NoneType
 
 import aiofiles
@@ -16,18 +15,7 @@ from nio import Event, MatrixRoom, RoomMessageText
 
 CONFIG_FILE = "credentials.json"
 
-REQUESTER_MAP = {
-    '@billchenchina:deepin.org': 'UTSweetyfish',
-    '@blumia:matrix.org': 'BLumia',
-    '@chenchongbiao:deepin.org': 'chenchongbiao',
-    '@deepin-community:matrix.org': 'Zeno-sole',
-    '@golf66:deepin.org': 'hudeng-go',
-    '@longlong:deepin.org': 'xzl01',
-    '@yukari:ewe.moe': 'YukariChiba',
-    '@telegram_283338155:t2bot.io': 'YukariChiba',
-    '@telegram_310653493:t2bot.io': 'RevySR',
-    '@avenger_285714:matrix.org': 'Avenger-285714',
-}
+
 
 client: AsyncClient | NoneType = None
 
@@ -56,118 +44,7 @@ def write_details_to_disk(resp: LoginResponse, homeserver) -> None:
         )
 
 
-async def message_callback(room: MatrixRoom, event: Event) -> None:
-    assert client
-    assert isinstance(event, RoomMessageText)
-    # deepin-sysdev-team
-    if room.room_id != '!arcYMpuEJhIvmonMaG:matrix.org':
-        return
-    if event.sender not in REQUESTER_MAP:
-        print(event.sender)
-        return
-    requester = REQUESTER_MAP[event.sender]
 
-    print(
-        f"Message received in room {room.display_name} ({room.room_id})\n"
-        f"{room.user_name(event.sender)} ({event.sender}) | {event.body}"
-    )
-
-    if event.body[0] != '/':
-        print('Not a command, ignored.')
-
-    command = event.body.split()[0]
-    # (package, branch, github_project_name, requester)
-    packages = []
-    topic = ''
-
-    if command in ['/update', '/batchupdate']:
-        try:
-            if int(open('LAST-UPDATED').read().strip()) < time.time() - 2 * 60 * 60:
-                # LAST-UPDATED fails more than 1 hours ago
-                # Is apt-get down?
-                await client.room_send(
-                    room.room_id,
-                    message_type="m.room.message",
-                    content={
-                        "msgtype": "m.text",
-                        "body": "LAST-UPDATED fails more than 2 hours ago. Is apt-get down?",
-                        "m.relates_to": {
-                            "m.in_reply_to": {
-                                "event_id": event.event_id
-                            }
-                        }
-                    }
-                )
-                return
-            else:
-                pass
-        except OSError:
-            # LAST-UPDATED does not present
-            await client.room_send(
-                room.room_id,
-                message_type="m.room.message",
-                content={
-                    "msgtype": "m.text",
-                    "body": "LAST-UPDATED not found.",
-                    "m.relates_to": {
-                        "m.in_reply_to": {
-                            "event_id": event.event_id
-                        }
-                    }
-                }
-            )
-            return
-    match command:
-        case "/update":
-            # no branch
-            # package
-            # requester
-            # do_update()
-            # /update package
-            args = event.body.split()
-            if len(args) != 2:
-                # TODO:
-                return
-            topic = ''
-            packages.append(args[1])
-        case "/batchupdate":
-            # topic, [package, [package, [package, [package, ...]]]]
-            args = event.body.split()
-            # /update topic-xxx pkg1 pkg2
-            if len(args) < 3:
-                # TODO:
-                return
-            topic = args[1]
-            if not topic.startswith('topic-'):
-                return
-            packages += args[2:]
-    if packages:
-
-        results = []
-        for package in packages:
-            print(f'Updating {package}')
-            p = asyncio.create_subprocess_exec(
-                'python', 'update.py', package, topic, '', requester,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-            results.append(p)
-
-        results = await asyncio.gather(*results)
-
-        await client.room_send(
-            room.room_id,
-            message_type="m.room.message",
-            content={
-                "msgtype": "m.text",
-                "body": "Done.",
-                "m.relates_to": {
-                    "m.in_reply_to": {
-                        "event_id": event.event_id
-                    }
-                }
-            }
-        )
 async def main() -> None:
     # TODO: OOP
     global client
@@ -239,10 +116,10 @@ async def main() -> None:
         #         }
         #     },
         # ))
-        client.add_event_callback(message_callback, RoomMessageText)
-        await client.sync_forever(timeout=30000)  # milliseconds
+        # client.add_event_callback(message_callback, RoomMessageText)
+        # await client.sync_forever(timeout=30000)  # milliseconds
     # Either way we're logged in here, too
-    await client.close()
+    # await client.close()
 
 
 asyncio.run(main())
