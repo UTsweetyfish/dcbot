@@ -27,7 +27,7 @@ REQUESTER_MAP = {
     '@telegram_283338155:t2bot.io': 'YukariChiba',
     '@telegram_310653493:t2bot.io': 'RevySR',
     '@avenger_285714:matrix.org': 'Avenger-285714',
-    '@telegram_5006263:t2bot.io': 'MingcongBai',
+    '@telegram_80332535:t2bot.io': 'MingcongBai',
 }
 
 client: AsyncClient | NoneType = None
