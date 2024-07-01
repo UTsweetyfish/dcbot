@@ -103,7 +103,7 @@ async def main() -> None:
             access_token=config["access_token"]
         )
 
-        atexit.register(lambda: await bot.client.close())
+        atexit.register(lambda: asyncio.run(bot.client.close()))
 
         await bot.run()
 
