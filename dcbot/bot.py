@@ -1,5 +1,6 @@
 
 import asyncio
+from asyncio.subprocess import Process
 import time
 
 from nio import (
@@ -146,7 +147,6 @@ class DCBot:
                 topic = args[1]
                 packages += args[2:]
         if packages:
-            
             if topic:
                 if not topic.startswith('topic-'):
                     await self.client.room_send(
@@ -191,21 +191,61 @@ class DCBot:
                 )
                 results.append(p)
 
-            results = await asyncio.gather(*results)
+            finished_processes: list[Process] = await asyncio.gather(*results)
+            success_count = 0
 
-            await self.client.room_send(
-                room.room_id,
-                message_type="m.room.message",
-                content={
-                    "msgtype": "m.text",
-                    "body": "Done.",
-                    "m.relates_to": {
-                        "m.in_reply_to": {
-                            "event_id": event.event_id
+            for result in finished_processes:
+                print(result)
+                print(type(result))
+                if result.returncode == 0:
+                    success_count += 1
+
+            if success_count == 0:
+                await self.client.room_send(
+                    room.room_id,
+                    message_type="m.room.message",
+                    content={
+                        "msgtype": "m.text",
+                        "body": "All failed 😭😭😭",
+                        "m.relates_to": {
+                            "m.in_reply_to": {
+                                "event_id": event.event_id
+                            }
                         }
                     }
-                }
-            )
+                )
+            elif success_count < len(finished_processes):
+                # 😶😶😶
+                await self.client.room_send(
+                    room.room_id,
+                    message_type="m.room.message",
+                    content={
+                        "msgtype": "m.text",
+                        "body": f"Done. {success_count}/{len(finished_processes)} succeeded 😶😶😶",
+                        "m.relates_to": {
+                            "m.in_reply_to": {
+                                "event_id": event.event_id
+                            }
+                        }
+                    }
+                )
+            elif success_count == len(finished_processes):
+                await self.client.room_send(
+                    room.room_id,
+                    message_type="m.room.message",
+                    content={
+                        "msgtype": "m.text",
+                        "body": "Done. All succeeded 🎉🎉🎉",
+                        "m.relates_to": {
+                            "m.in_reply_to": {
+                                "event_id": event.event_id
+                            }
+                        }
+                    }
+                )
+            else:
+                # unreachable
+                assert False
 
 
     async def run(self, timeout: int = 30000):
