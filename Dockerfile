@@ -36,7 +36,7 @@ RUN mv /app/docker-entrypoint.sh /
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
 
-CMD [ "python3", "bot.py" ]
+CMD [ "python3", "-m", "dcbot" ]
 
 # credentials.json required by bot.py for Matrix Login
 # config.ini and *.pem are required by update.py for GitHub
