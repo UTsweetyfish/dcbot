@@ -19,7 +19,7 @@ from debian.changelog import Changelog
 
 import requests
 
-from req import installation_token
+from dcbot.req import installation_token
 
 # https://dep-team.pages.debian.net/deps/dep14/
 def mangle(version):
@@ -324,7 +324,6 @@ def update(
 
     # input(f'Will push to origin:{branch}. Continue?')
 
-    # FIXME: DO NOT FORCE PUSH IN PRODUCTION
     subprocess.check_output([
         'git', 'push', '-uf', 'origin', branch
     ])
@@ -381,5 +380,6 @@ def main():
     # ]
 
     update(package, branch, github_project_name, requester)
+
 if __name__ == '__main__':
     main()

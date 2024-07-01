@@ -2,3 +2,5 @@ venv/
 *.pem
 cache.pkl
 config.ini
+__pycache__/
+*.pyc

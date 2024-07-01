@@ -48,6 +48,11 @@ def _installation_token():
 def installation_token() -> str:
     try:
         o = pickle.load(open(f'{_curdir}/cache.pkl', 'rb'))
+    # Not using UnpicklingError here due to pickle.load may raise other exceptions.
+    # from _pickle.UnpicklingError:
+    #     Note that other exceptions may also be raised during unpickling, including
+    #     (but not necessarily limited to) AttributeError, EOFError, ImportError,
+    #     and IndexError.
     except Exception:
         o = None
 
