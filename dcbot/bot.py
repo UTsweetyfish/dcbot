@@ -10,6 +10,8 @@ from nio import (
     RoomMessageText,
 )
 
+from dcbot.utils import already_processed, mark_processed
+
 class DCBot:
 
     client: AsyncClient
@@ -74,6 +76,8 @@ class DCBot:
             return
         requester = self.REQUESTER_MAP[event.sender]
 
+        event_id = event.event_id
+
         print(
             f"Message received in room {room.display_name} ({room.room_id})\n"
             f"{room.user_name(event.sender)} ({event.sender}) | {event.body}"
@@ -100,7 +104,7 @@ class DCBot:
                             "body": "LAST-UPDATED fails more than 2 hours ago. Is apt-get down?",
                             "m.relates_to": {
                                 "m.in_reply_to": {
-                                    "event_id": event.event_id
+                                    "event_id": event_id
                                 }
                             }
                         }
@@ -118,7 +122,7 @@ class DCBot:
                         "body": "LAST-UPDATED not found.",
                         "m.relates_to": {
                             "m.in_reply_to": {
-                                "event_id": event.event_id
+                                "event_id": event_id
                             }
                         }
                     }
@@ -146,6 +150,11 @@ class DCBot:
                     return
                 topic = args[1]
                 packages += args[2:]
+
+        if await already_processed(event_id):
+            print(f'Event {event_id} already processed. Skipping.')
+            return
+
         if packages:
             if topic:
                 if not topic.startswith('topic-'):
@@ -157,7 +166,7 @@ class DCBot:
                             "body": "Topic name should prefix with topic-.",
                             "m.relates_to": {
                                 "m.in_reply_to": {
-                                    "event_id": event.event_id
+                                    "event_id": event_id
                                 }
                             }
                         }
@@ -174,7 +183,7 @@ class DCBot:
                             "body": "Topic name invalid.",
                             "m.relates_to": {
                                 "m.in_reply_to": {
-                                    "event_id": event.event_id
+                                    "event_id": event_id
                                 }
                             }
                         }
@@ -200,6 +209,8 @@ class DCBot:
                 if result.returncode == 0:
                     success_count += 1
 
+            await mark_processed(event_id)
+
             if success_count == 0:
                 await self.client.room_send(
                     room.room_id,
@@ -209,7 +220,7 @@ class DCBot:
                         "body": "All failed 😭😭😭",
                         "m.relates_to": {
                             "m.in_reply_to": {
-                                "event_id": event.event_id
+                                "event_id": event_id
                             }
                         }
                     }
@@ -224,7 +235,7 @@ class DCBot:
                         "body": f"Done. {success_count}/{len(finished_processes)} succeeded 😶😶😶",
                         "m.relates_to": {
                             "m.in_reply_to": {
-                                "event_id": event.event_id
+                                "event_id": event_id
                             }
                         }
                     }
@@ -238,7 +249,7 @@ class DCBot:
                         "body": "Done. All succeeded 🎉🎉🎉",
                         "m.relates_to": {
                             "m.in_reply_to": {
-                                "event_id": event.event_id
+                                "event_id": event_id
                             }
                         }
                     }
