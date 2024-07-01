@@ -144,10 +144,42 @@ class DCBot:
                     # TODO:
                     return
                 topic = args[1]
-                if not topic.startswith('topic-'):
-                    return
                 packages += args[2:]
         if packages:
+            
+            if topic:
+                if not topic.startswith('topic-'):
+                    await self.client.room_send(
+                        room.room_id,
+                        message_type="m.room.message",
+                        content={
+                            "msgtype": "m.text",
+                            "body": "Topic name should prefix with topic-.",
+                            "m.relates_to": {
+                                "m.in_reply_to": {
+                                    "event_id": event.event_id
+                                }
+                            }
+                        }
+                    )
+                    return
+
+                from .utils import validate_topicname
+                if not validate_topicname(topic):
+                    await self.client.room_send(
+                        room.room_id,
+                        message_type="m.room.message",
+                        content={
+                            "msgtype": "m.text",
+                            "body": "Topic name invalid.",
+                            "m.relates_to": {
+                                "m.in_reply_to": {
+                                    "event_id": event.event_id
+                                }
+                            }
+                        }
+                    )
+                    return
 
             results = []
             for package in packages:
