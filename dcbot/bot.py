@@ -1,6 +1,7 @@
 
 import asyncio
 from asyncio.subprocess import Process
+import sys
 import time
 
 from nio import (
@@ -208,6 +209,9 @@ class DCBot:
                 print(type(result))
                 if result.returncode == 0:
                     success_count += 1
+                else:
+                    if result.stderr:
+                        print(await result.stderr.read(), file=sys.stderr)
 
             await mark_processed(event_id)
 
