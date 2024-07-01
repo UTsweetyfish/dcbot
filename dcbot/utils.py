@@ -32,7 +32,7 @@ async def already_processed(event_id: str):
                 return False
         except FileNotFoundError:
             print('Creating done-events.json...')
-            with open('done-events.json') as f:
+            with open('done-events.json', 'w') as f:
                 json.dump([], f)
 
 
