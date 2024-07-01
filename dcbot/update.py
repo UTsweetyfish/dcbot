@@ -84,6 +84,12 @@ def gen_pr_body(old: str, new: str):
                 body += '## Potential transition\n'
             body += f'- **{package}** is not present in the new package.\n'
 
+    if 't64:Provides' in open(f'{new}/debian/control').read() or \
+       't64:Provides' in open(f'{new}/debian/rules').read() or \
+        'dpkg-dev (>= 1.22.5)' in open(f'{new}/debian/control'):
+        body += f'## 64-bit time_t transition\n'
+        body += 'DCBot assumes this package is already gone through **64-bit time_t** transition.\n'
+
     old_series = []
     new_series = []
 
