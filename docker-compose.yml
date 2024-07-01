@@ -8,9 +8,9 @@ services:
         read_only: true
       - type: bind
         source: ./config.ini
-        target: /app/config.ini
+        target: /app/dcbot/config.ini
         read_only: true
       - type: bind
         source: ./private-key.pem
-        target: /app/private-key.pem
+        target: /app/dcbot/private-key.pem
         read_only: true
