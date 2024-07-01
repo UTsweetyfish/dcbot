@@ -8,22 +8,22 @@ from zoneinfo import ZoneInfo
 import jwt
 import requests
 
-_curdir = os.path.dirname(__file__)
+# _curdir = os.path.dirname(__file__)
 
 
 def load_config():
     config = ConfigParser()
-    config.read(f'{_curdir}/config.ini')
+    config.read(f'config.ini')
     return config['DEFAULT']
     # private_key = config['DEFAULT']['PrivateKey']
     # if not isabs(private_key):
-    #     private_key = f'{_curdir}/{private_key}'
+    #     private_key = f'{private_key}'
 
 
 def genjwt():
     cfg = load_config()
 
-    with open(f'{_curdir}/{cfg["PrivateKey"]}') as f:
+    with open(f'{cfg["PrivateKey"]}') as f:
         key = f.read()
     payload = {
         'iat': int(time.time()) - 10,
@@ -47,7 +47,7 @@ def _installation_token():
 
 def installation_token() -> str:
     try:
-        o = pickle.load(open(f'{_curdir}/cache.pkl', 'rb'))
+        o = pickle.load(open(f'cache.pkl', 'rb'))
     # Not using UnpicklingError here due to pickle.load may raise other exceptions.
     # from _pickle.UnpicklingError:
     #     Note that other exceptions may also be raised during unpickling, including
@@ -66,7 +66,7 @@ def installation_token() -> str:
     else:
         print('Requesting api.github.com for installation token...')
         o = _installation_token()
-        pickle.dump(o, open(f'{_curdir}/cache.pkl', 'wb'))
+        pickle.dump(o, open(f'cache.pkl', 'wb'))
 
     return o['token']
 
