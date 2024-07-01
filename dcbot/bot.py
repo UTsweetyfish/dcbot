@@ -191,20 +191,20 @@ class DCBot:
                     )
                     return
 
-            results = []
+            results: list[Process] = []
             for package in packages:
                 print(f'Updating {package}')
-                p = asyncio.create_subprocess_exec(
+                p = await asyncio.create_subprocess_exec(
                     'python', '-m', 'dcbot.update', package, topic, '', requester,
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE,
                 )
                 results.append(p)
 
-            finished_processes: list[Process] = await asyncio.gather(*results)
             success_count = 0
 
-            for result in finished_processes:
+            for result in results:
+                await result.wait()
                 print(result)
                 print(type(result))
                 if result.returncode == 0:
@@ -229,14 +229,14 @@ class DCBot:
                         }
                     }
                 )
-            elif success_count < len(finished_processes):
+            elif success_count < len(results):
                 # 😶😶😶
                 await self.client.room_send(
                     room.room_id,
                     message_type="m.room.message",
                     content={
                         "msgtype": "m.text",
-                        "body": f"Done. {success_count}/{len(finished_processes)} succeeded 😶😶😶",
+                        "body": f"Done. {success_count}/{len(results)} succeeded 😶😶😶",
                         "m.relates_to": {
                             "m.in_reply_to": {
                                 "event_id": event_id
@@ -244,7 +244,7 @@ class DCBot:
                         }
                     }
                 )
-            elif success_count == len(finished_processes):
+            elif success_count == len(results):
                 await self.client.room_send(
                     room.room_id,
                     message_type="m.room.message",
