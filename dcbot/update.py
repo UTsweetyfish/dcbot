@@ -86,7 +86,8 @@ def gen_pr_body(old: str, new: str):
 
     if 't64:Provides' in open(f'{new}/debian/control').read() or \
        't64:Provides' in open(f'{new}/debian/rules').read() or \
-        'dpkg-dev (>= 1.22.5)' in open(f'{new}/debian/control'):
+        'dpkg-dev (>= 1.22.5)' in open(f'{new}/debian/control') or \
+        'X-Time64-Compat' in open(f'{new}/debian/control'):
         body += f'## 64-bit time_t transition\n'
         body += 'DCBot assumes this package is already gone through **64-bit time_t** transition.\n'
 
