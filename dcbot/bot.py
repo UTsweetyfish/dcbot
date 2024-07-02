@@ -93,16 +93,45 @@ class DCBot:
         topic = ''
 
         if command in ['/update', '/batchupdate']:
-            try:
-                if int(open('LAST-UPDATED').read().strip()) < time.time() - 2 * 60 * 60:
-                    # LAST-UPDATED fails more than 1 hours ago
-                    # Is apt-get down?
+            retry_count = 0
+            MAX_RETRY_COUNT = 3
+            while retry_count <= MAX_RETRY_COUNT:
+                try:
+                    if int(open('LAST-UPDATED').read().strip()) < time.time() - 2 * 60 * 60:
+                        # LAST-UPDATED fails more than 1 hours ago
+                        # Is apt-get down?
+                        await self.client.room_send(
+                            room.room_id,
+                            message_type="m.room.message",
+                            content={
+                                "msgtype": "m.text",
+                                "body": "LAST-UPDATED fails more than 2 hours ago. Is apt-get down?",
+                                "m.relates_to": {
+                                    "m.in_reply_to": {
+                                        "event_id": event_id
+                                    }
+                                }
+                            }
+                        )
+                        return
+                    else:
+                        # break retry
+                        break
+                except OSError:
+                    if retry_count < MAX_RETRY_COUNT:
+                        await asyncio.sleep(5) # in seconds
+                        # retry
+                        retry_count += 1
+                        continue
+
+                    # LAST-UPDATED does not present
+                    # and all retry failed
                     await self.client.room_send(
                         room.room_id,
                         message_type="m.room.message",
                         content={
                             "msgtype": "m.text",
-                            "body": "LAST-UPDATED fails more than 2 hours ago. Is apt-get down?",
+                            "body": "LAST-UPDATED not found.",
                             "m.relates_to": {
                                 "m.in_reply_to": {
                                     "event_id": event_id
@@ -111,24 +140,6 @@ class DCBot:
                         }
                     )
                     return
-                else:
-                    pass
-            except OSError:
-                # LAST-UPDATED does not present
-                await self.client.room_send(
-                    room.room_id,
-                    message_type="m.room.message",
-                    content={
-                        "msgtype": "m.text",
-                        "body": "LAST-UPDATED not found.",
-                        "m.relates_to": {
-                            "m.in_reply_to": {
-                                "event_id": event_id
-                            }
-                        }
-                    }
-                )
-                return
         match command:
             case "/update":
                 # no branch
