@@ -13,7 +13,7 @@ RUN echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/source
     python3-pip \
     python3-venv \
     python3-wheel \
-    wget
+    curl
 
 
 ENV PYTHONDONTWRITEBYTECODE=1
