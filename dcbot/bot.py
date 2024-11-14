@@ -30,6 +30,7 @@ class DCBot:
         '@avenger_285714:matrix.org': 'Avenger-285714',
         '@telegram_80332535:t2bot.io': 'MingcongBai',
         '@telegram_1618120212:t2bot.io': 'Gui-Yue',
+        '@alongnice:deepin.org': 'alongnice',
     }
 
 
