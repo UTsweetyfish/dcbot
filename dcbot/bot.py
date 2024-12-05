@@ -31,6 +31,7 @@ class DCBot:
         '@telegram_80332535:t2bot.io': 'MingcongBai',
         '@telegram_1618120212:t2bot.io': 'Gui-Yue',
         '@alongnice:deepin.org': 'alongnice',
+        '@zengwei00:deepin.org': 'zengwei00',
     }
 
 
