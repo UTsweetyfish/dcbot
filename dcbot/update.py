@@ -46,14 +46,10 @@ def cleanup(_dir: str):
 # old = '/path/to/GIT.OLD'
 # new = '/path/to/GIT.NEW'
 def gen_pr_body(old: str, new: str):
-    old_control = [
-        item for item in Deb822.iter_paragraphs(open(f"{old}/debian/control"))
-    ]
+    old_control = list(Deb822.iter_paragraphs(open(f"{old}/debian/control")))
     old_changelog = Changelog(open(f"{old}/debian/changelog"))
 
-    new_control = [
-        item for item in Deb822.iter_paragraphs(open(f"{new}/debian/control"))
-    ]
+    new_control = list(Deb822.iter_paragraphs(open(f"{new}/debian/control")))
     new_changelog = Changelog(open(f"{new}/debian/changelog"))
 
     body = ""
