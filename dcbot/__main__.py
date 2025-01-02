@@ -2,13 +2,15 @@
 
 import asyncio
 import atexit
+import getpass
 import json
 import os
 import sys
 
 import aiofiles
-
 from nio import AsyncClient, LoginResponse
+
+from .bot import DCBot
 
 CONFIG_FILE = "credentials.json"
 
@@ -37,6 +39,7 @@ def write_details_to_disk(resp: LoginResponse, homeserver) -> None:
             f,
         )
 
+
 async def login():
     print(
         "First time use. Did not find credential file. Asking for "
@@ -64,7 +67,7 @@ async def login():
         device_name = _device_name
 
     client = AsyncClient(homeserver, user_id)
-    import getpass
+
     pw = getpass.getpass()
 
     resp = await client.login(pw, device_name=device_name)
@@ -82,6 +85,7 @@ async def login():
         "Try running the script again to login with credentials.",
     )
 
+
 async def main() -> None:
     # If there are no previously-saved credentials, we'll use the password
     if not os.path.exists(CONFIG_FILE):
@@ -90,17 +94,16 @@ async def main() -> None:
     # Otherwise the config file exists, so we'll use the stored credentials
     else:
         # open the file in read-only mode
-        print(f'Loading config file from {CONFIG_FILE}...')
+        print(f"Loading config file from {CONFIG_FILE}...")
         async with aiofiles.open(CONFIG_FILE, "r") as f:
             contents = await f.read()
         config = json.loads(contents)
 
-        from .bot import DCBot
         bot = DCBot(
             homeserver=config["homeserver"],
             user=config["user_id"],
             device_id=config["device_id"],
-            access_token=config["access_token"]
+            access_token=config["access_token"],
         )
 
         atexit.register(lambda: asyncio.run(bot.client.close()))
@@ -110,5 +113,6 @@ async def main() -> None:
     # Either way we're logged in here, too
     await bot.client.close()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     asyncio.run(main())

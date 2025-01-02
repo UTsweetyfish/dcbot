@@ -1,56 +1,46 @@
-
 import asyncio
-from asyncio.subprocess import Process
 import sys
 import time
+from asyncio.subprocess import Process
 
-from nio import (
-    AsyncClient,
-    Event,
-    MatrixRoom,
-    RoomMessageText,
-)
+from nio import AsyncClient, Event, MatrixRoom, RoomMessageText
 
-from dcbot.utils import already_processed, mark_processed
+from dcbot.utils import already_processed, mark_processed, validate_topicname
+
 
 class DCBot:
 
     client: AsyncClient
 
     REQUESTER_MAP = {
-        '@billchenchina:deepin.org': 'UTSweetyfish',
-        '@blumia:matrix.org': 'BLumia',
-        '@chenchongbiao:deepin.org': 'chenchongbiao',
-        '@deepin-community:matrix.org': 'Zeno-sole',
-        '@golf66:deepin.org': 'hudeng-go',
-        '@longlong:deepin.org': 'xzl01',
-        '@yukari:ewe.moe': 'YukariChiba',
-        '@telegram_283338155:t2bot.io': 'YukariChiba',
-        '@telegram_310653493:t2bot.io': 'RevySR',
-        '@avenger_285714:matrix.org': 'Avenger-285714',
-        '@telegram_80332535:t2bot.io': 'MingcongBai',
-        '@telegram_1618120212:t2bot.io': 'Gui-Yue',
+        "@billchenchina:deepin.org": "UTSweetyfish",
+        "@blumia:matrix.org": "BLumia",
+        "@chenchongbiao:deepin.org": "chenchongbiao",
+        "@deepin-community:matrix.org": "Zeno-sole",
+        "@golf66:deepin.org": "hudeng-go",
+        "@longlong:deepin.org": "xzl01",
+        "@yukari:ewe.moe": "YukariChiba",
+        "@telegram_283338155:t2bot.io": "YukariChiba",
+        "@telegram_310653493:t2bot.io": "RevySR",
+        "@avenger_285714:matrix.org": "Avenger-285714",
+        "@telegram_80332535:t2bot.io": "MingcongBai",
+        "@telegram_1618120212:t2bot.io": "Gui-Yue",
     }
 
-
-    def __init__(self,
-                 homeserver: str = '',
-                 user: str = '',
-                 device_id: str = '',
-                 access_token: str = '',
-                 ) -> None:
-        self.client = AsyncClient(
-            homeserver,
-            user,
-            device_id=device_id
-        )
+    def __init__(
+        self,
+        homeserver: str = "",
+        user: str = "",
+        device_id: str = "",
+        access_token: str = "",
+    ) -> None:
+        self.client = AsyncClient(homeserver, user, device_id=device_id)
         self.client.access_token = access_token
 
-
     async def send_test_message(
-            self,
-            room_id: str = '!arcYMpuEJhIvmonMaG:matrix.org',
-            body: str = 'Hello world!',
+        self,
+        room_id: str = "!arcYMpuEJhIvmonMaG:matrix.org",
+        body: str = "Hello world!",
     ):
         assert self.client
         await self.client.room_send(
@@ -67,12 +57,11 @@ class DCBot:
             },
         )
 
-
     async def message_callback(self, room: MatrixRoom, event: Event) -> None:
         assert self.client
         assert isinstance(event, RoomMessageText)
         # deepin-sysdev-team
-        if room.room_id != '!arcYMpuEJhIvmonMaG:matrix.org':
+        if room.room_id != "!arcYMpuEJhIvmonMaG:matrix.org":
             return
         if event.sender not in self.REQUESTER_MAP:
             print(event.sender)
@@ -86,20 +75,23 @@ class DCBot:
             f"{room.user_name(event.sender)} ({event.sender}) | {event.body}"
         )
 
-        if event.body[0] != '/':
-            print('Not a command, ignored.')
+        if event.body[0] != "/":
+            print("Not a command, ignored.")
 
         command = event.body.split()[0]
         # (package, branch, github_project_name, requester)
         packages = []
-        topic = ''
+        topic = ""
 
-        if command in ['/update', '/batchupdate']:
+        if command in ["/update", "/batchupdate"]:
             retry_count = 0
             MAX_RETRY_COUNT = 3
             while retry_count <= MAX_RETRY_COUNT:
                 try:
-                    if int(open('LAST-UPDATED').read().strip()) < time.time() - 2 * 60 * 60:
+                    if (
+                        int(open("LAST-UPDATED").read().strip())
+                        < time.time() - 2 * 60 * 60
+                    ):
                         # LAST-UPDATED fails more than 1 hours ago
                         # Is apt-get down?
                         await self.client.room_send(
@@ -109,11 +101,9 @@ class DCBot:
                                 "msgtype": "m.text",
                                 "body": "LAST-UPDATED fails more than 2 hours ago. Is apt-get down?",
                                 "m.relates_to": {
-                                    "m.in_reply_to": {
-                                        "event_id": event_id
-                                    }
-                                }
-                            }
+                                    "m.in_reply_to": {"event_id": event_id}
+                                },
+                            },
                         )
                         return
                     else:
@@ -121,7 +111,7 @@ class DCBot:
                         break
                 except OSError:
                     if retry_count < MAX_RETRY_COUNT:
-                        await asyncio.sleep(5) # in seconds
+                        await asyncio.sleep(5)  # in seconds
                         # retry
                         retry_count += 1
                         continue
@@ -134,12 +124,8 @@ class DCBot:
                         content={
                             "msgtype": "m.text",
                             "body": "LAST-UPDATED not found.",
-                            "m.relates_to": {
-                                "m.in_reply_to": {
-                                    "event_id": event_id
-                                }
-                            }
-                        }
+                            "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
+                        },
                     )
                     return
         match command:
@@ -153,7 +139,7 @@ class DCBot:
                 if len(args) != 2:
                     # TODO:
                     return
-                topic = ''
+                topic = ""
                 packages.append(args[1])
             case "/batchupdate":
                 # topic, [package, [package, [package, [package, ...]]]]
@@ -166,28 +152,23 @@ class DCBot:
                 packages += args[2:]
 
         if await already_processed(event_id):
-            print(f'Event {event_id} already processed. Skipping.')
+            print(f"Event {event_id} already processed. Skipping.")
             return
 
         if packages:
             if topic:
-                if not topic.startswith('topic-'):
+                if not topic.startswith("topic-"):
                     await self.client.room_send(
                         room.room_id,
                         message_type="m.room.message",
                         content={
                             "msgtype": "m.text",
                             "body": "Topic name should prefix with topic-.",
-                            "m.relates_to": {
-                                "m.in_reply_to": {
-                                    "event_id": event_id
-                                }
-                            }
-                        }
+                            "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
+                        },
                     )
                     return
 
-                from .utils import validate_topicname
                 if not validate_topicname(topic):
                     await self.client.room_send(
                         room.room_id,
@@ -195,20 +176,22 @@ class DCBot:
                         content={
                             "msgtype": "m.text",
                             "body": "Topic name invalid.",
-                            "m.relates_to": {
-                                "m.in_reply_to": {
-                                    "event_id": event_id
-                                }
-                            }
-                        }
+                            "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
+                        },
                     )
                     return
 
             results: list[Process] = []
             for package in packages:
-                print(f'Updating {package}')
+                print(f"Updating {package}")
                 p = await asyncio.create_subprocess_exec(
-                    'python', '-m', 'dcbot.update', package, topic, '', requester,
+                    "python",
+                    "-m",
+                    "dcbot.update",
+                    package,
+                    topic,
+                    "",
+                    requester,
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE,
                 )
@@ -235,12 +218,8 @@ class DCBot:
                     content={
                         "msgtype": "m.text",
                         "body": "All failed 😭😭😭",
-                        "m.relates_to": {
-                            "m.in_reply_to": {
-                                "event_id": event_id
-                            }
-                        }
-                    }
+                        "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
+                    },
                 )
             elif success_count < len(results):
                 # 😶😶😶
@@ -250,12 +229,8 @@ class DCBot:
                     content={
                         "msgtype": "m.text",
                         "body": f"Done. {success_count}/{len(results)} succeeded 😶😶😶",
-                        "m.relates_to": {
-                            "m.in_reply_to": {
-                                "event_id": event_id
-                            }
-                        }
-                    }
+                        "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
+                    },
                 )
             elif success_count == len(results):
                 await self.client.room_send(
@@ -264,17 +239,12 @@ class DCBot:
                     content={
                         "msgtype": "m.text",
                         "body": "Done. All succeeded 🎉🎉🎉",
-                        "m.relates_to": {
-                            "m.in_reply_to": {
-                                "event_id": event_id
-                            }
-                        }
-                    }
+                        "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
+                    },
                 )
             else:
                 # unreachable
                 assert False
-
 
     async def run(self, timeout: int = 30000):
         self.client.add_event_callback(self.message_callback, RoomMessageText)
