@@ -51,7 +51,7 @@ class DCBot:
             message_type="m.room.message",
             content={
                 "msgtype": "m.text",
-                "body": "Hello world!",
+                "body": body,
             },
         )
 
