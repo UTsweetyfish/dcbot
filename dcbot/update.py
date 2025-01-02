@@ -71,14 +71,21 @@ def gen_pr_body(old: str, new: str):
         body += "native" if new_native else "quilt"
         body += "\n"
 
-    if "dde" in old_changelog.full_version or "deepin" in old_changelog.full_version:
+    if (
+        "dde" in old_changelog.full_version
+        or "deepin" in old_changelog.full_version
+    ):
         body += "Old version may contain dde / deepin patches. Please review more precisely.\n"
 
     body += "\n"
 
     potential_transition = False
-    old_package_list = [binary_section["Package"] for binary_section in old_control[1:]]
-    new_package_list = [binary_section["Package"] for binary_section in new_control[1:]]
+    old_package_list = [
+        binary_section["Package"] for binary_section in old_control[1:]
+    ]
+    new_package_list = [
+        binary_section["Package"] for binary_section in new_control[1:]
+    ]
     for package in old_package_list:
         if package == "template-repository":
             continue
@@ -312,7 +319,9 @@ def update(
     assert not isdir("debian/deepin")
     copytree("../GIT.OLD/.git", ".git")
 
-    subprocess.check_output(["git", "checkout", "--", "debian/deepin", ".github/"])
+    subprocess.check_output(
+        ["git", "checkout", "--", "debian/deepin", ".github/"]
+    )
     try:
         subprocess.check_output(["git", "branch", "-D", branch])
     except subprocess.CalledProcessError:

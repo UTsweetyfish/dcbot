@@ -51,7 +51,9 @@ async def login():
     if _homeserver:
         homeserver = _homeserver
 
-    if not (homeserver.startswith("https://") or homeserver.startswith("http://")):
+    if not (
+        homeserver.startswith("https://") or homeserver.startswith("http://")
+    ):
         homeserver = "https://" + homeserver
 
     user_id = "@dcbot:matrix.org"
@@ -61,7 +63,9 @@ async def login():
         user_id = _user_id
 
     device_name = "matrix-nio"
-    _device_name = input(f"Choose a name for this device: [{device_name}] ").strip()
+    _device_name = input(
+        f"Choose a name for this device: [{device_name}] "
+    ).strip()
 
     if _device_name:
         device_name = _device_name

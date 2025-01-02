@@ -121,7 +121,9 @@ class DCBot:
                         content={
                             "msgtype": "m.text",
                             "body": "LAST-UPDATED not found.",
-                            "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
+                            "m.relates_to": {
+                                "m.in_reply_to": {"event_id": event_id}
+                            },
                         },
                     )
                     return
@@ -161,7 +163,9 @@ class DCBot:
                         content={
                             "msgtype": "m.text",
                             "body": "Topic name should prefix with topic-.",
-                            "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
+                            "m.relates_to": {
+                                "m.in_reply_to": {"event_id": event_id}
+                            },
                         },
                     )
                     return
@@ -173,7 +177,9 @@ class DCBot:
                         content={
                             "msgtype": "m.text",
                             "body": "Topic name invalid.",
-                            "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
+                            "m.relates_to": {
+                                "m.in_reply_to": {"event_id": event_id}
+                            },
                         },
                     )
                     return
@@ -215,7 +221,9 @@ class DCBot:
                     content={
                         "msgtype": "m.text",
                         "body": "All failed 😭😭😭",
-                        "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
+                        "m.relates_to": {
+                            "m.in_reply_to": {"event_id": event_id}
+                        },
                     },
                 )
             elif success_count < len(results):
@@ -226,7 +234,9 @@ class DCBot:
                     content={
                         "msgtype": "m.text",
                         "body": f"Done. {success_count}/{len(results)} succeeded 😶😶😶",
-                        "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
+                        "m.relates_to": {
+                            "m.in_reply_to": {"event_id": event_id}
+                        },
                     },
                 )
             elif success_count == len(results):
@@ -236,7 +246,9 @@ class DCBot:
                     content={
                         "msgtype": "m.text",
                         "body": "Done. All succeeded 🎉🎉🎉",
-                        "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
+                        "m.relates_to": {
+                            "m.in_reply_to": {"event_id": event_id}
+                        },
                     },
                 )
             else:
