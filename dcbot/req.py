@@ -62,8 +62,7 @@ def installation_token() -> str:
     if o:
         exp = datetime.fromisoformat(o["expires_at"])
         if (
-            datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
-            + timedelta(minutes=30)
+            datetime.utcnow().replace(tzinfo=ZoneInfo("UTC")) + timedelta(minutes=30)
             > exp
         ):
             o = None

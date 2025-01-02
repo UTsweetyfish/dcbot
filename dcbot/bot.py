@@ -10,7 +10,6 @@ from dcbot.utils import already_processed, mark_processed, validate_topicname
 
 
 class DCBot:
-
     client: AsyncClient
 
     REQUESTER_MAP = {
@@ -105,10 +104,7 @@ class DCBot:
                     await asyncio.sleep(5)  # in seconds
                     continue
 
-            if (
-                int(open("LAST-UPDATED").read().strip())
-                < time.time() - 2 * 60 * 60
-            ):
+            if int(open("LAST-UPDATED").read().strip()) < time.time() - 2 * 60 * 60:
                 # LAST-UPDATED fails more than 1 hours ago
                 # Is apt-get down?
                 await self.client.room_send(
@@ -117,9 +113,7 @@ class DCBot:
                     content={
                         "msgtype": "m.text",
                         "body": "LAST-UPDATED fails more than 2 hours ago. Is apt-get down?",
-                        "m.relates_to": {
-                            "m.in_reply_to": {"event_id": event_id}
-                        },
+                        "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
                     },
                 )
                 return
@@ -160,9 +154,7 @@ class DCBot:
                         content={
                             "msgtype": "m.text",
                             "body": "Topic name should prefix with topic-.",
-                            "m.relates_to": {
-                                "m.in_reply_to": {"event_id": event_id}
-                            },
+                            "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
                         },
                     )
                     return
@@ -174,9 +166,7 @@ class DCBot:
                         content={
                             "msgtype": "m.text",
                             "body": "Topic name invalid.",
-                            "m.relates_to": {
-                                "m.in_reply_to": {"event_id": event_id}
-                            },
+                            "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
                         },
                     )
                     return
@@ -218,9 +208,7 @@ class DCBot:
                     content={
                         "msgtype": "m.text",
                         "body": "All failed 😭😭😭",
-                        "m.relates_to": {
-                            "m.in_reply_to": {"event_id": event_id}
-                        },
+                        "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
                     },
                 )
             elif success_count < len(results):
@@ -231,9 +219,7 @@ class DCBot:
                     content={
                         "msgtype": "m.text",
                         "body": f"Done. {success_count}/{len(results)} succeeded 😶😶😶",
-                        "m.relates_to": {
-                            "m.in_reply_to": {"event_id": event_id}
-                        },
+                        "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
                     },
                 )
             elif success_count == len(results):
@@ -243,9 +229,7 @@ class DCBot:
                     content={
                         "msgtype": "m.text",
                         "body": "Done. All succeeded 🎉🎉🎉",
-                        "m.relates_to": {
-                            "m.in_reply_to": {"event_id": event_id}
-                        },
+                        "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
                     },
                 )
             else:
