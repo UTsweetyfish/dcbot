@@ -94,7 +94,7 @@ def gen_pr_body(old: str, new: str):
         or "dpkg-dev (>= 1.22.5)" in open(f"{new}/debian/control")
         or "X-Time64-Compat" in open(f"{new}/debian/control")
     ):
-        body += f"## 64-bit time_t transition\n"
+        body += "## 64-bit time_t transition\n"
         body += "DCBot assumes this package is already gone through **64-bit time_t** transition.\n"
 
     old_series = []
@@ -107,7 +107,10 @@ def gen_pr_body(old: str, new: str):
 
     d = "".join(
         difflib.unified_diff(
-            old_series, new_series, "a/debian/patches/series", "b/debian/patches/series"
+            old_series,
+            new_series,
+            "a/debian/patches/series",
+            "b/debian/patches/series",
         )
     )
     if d.strip():
@@ -267,7 +270,12 @@ def update(
     chdir("SOURCE")
     if m_url:
         subprocess.check_output(
-            ["dget", "--download-only", "--allow-unauthenticated", m_url.group(0)]
+            [
+                "dget",
+                "--download-only",
+                "--allow-unauthenticated",
+                m_url.group(0),
+            ]
         )
     elif m_p_with_s:
         subprocess.check_output(

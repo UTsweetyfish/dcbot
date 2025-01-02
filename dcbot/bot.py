@@ -51,11 +51,6 @@ class DCBot:
             content={
                 "msgtype": "m.text",
                 "body": "Hello world!",
-                # "m.relates_to": {
-                #     "m.in_reply_to": {
-                #         "event_id": "$eventId0123456789ABCDEFabcdef0123456789AB",
-                #     }
-                # },
             },
         )
 
