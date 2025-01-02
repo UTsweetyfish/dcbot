@@ -14,19 +14,19 @@ class DCBot:
     client: AsyncClient
 
     REQUESTER_MAP = {
+        "@alongnice:deepin.org": "alongnice",
+        "@avenger_285714:matrix.org": "Avenger-285714",
         "@billchenchina:deepin.org": "UTSweetyfish",
         "@blumia:matrix.org": "BLumia",
         "@chenchongbiao:deepin.org": "chenchongbiao",
         "@deepin-community:matrix.org": "Zeno-sole",
         "@golf66:deepin.org": "hudeng-go",
         "@longlong:deepin.org": "xzl01",
-        "@yukari:ewe.moe": "YukariChiba",
+        "@telegram_1618120212:t2bot.io": "Gui-Yue",
         "@telegram_283338155:t2bot.io": "YukariChiba",
         "@telegram_310653493:t2bot.io": "RevySR",
-        "@avenger_285714:matrix.org": "Avenger-285714",
         "@telegram_80332535:t2bot.io": "MingcongBai",
-        "@telegram_1618120212:t2bot.io": "Gui-Yue",
-        "@alongnice:deepin.org": "alongnice",
+        "@yukari:ewe.moe": "YukariChiba",
         "@zengwei:matrix.org": "zengwei00",
     }
 
