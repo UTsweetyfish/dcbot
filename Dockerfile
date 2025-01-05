@@ -11,9 +11,11 @@ RUN echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/source
     python3-apt \
     python3-debian \
     python3-pip \
+    python3-redis \
     python3-venv \
     python3-wheel \
-    curl
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 
 ENV PYTHONDONTWRITEBYTECODE=1

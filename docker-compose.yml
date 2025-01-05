@@ -14,3 +14,14 @@ services:
         source: ./private-key.pem
         target: /app/dcbot/private-key.pem
         read_only: true
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+  redis:
+    image: redis
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  redis_data:

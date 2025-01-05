@@ -1,5 +1,7 @@
-import json
-from asyncio import Lock
+from os import getenv
+from typing import Awaitable
+
+from redis import Redis
 
 
 def validate_topicname(topic_name: str) -> bool:
@@ -14,37 +16,37 @@ def validate_topicname(topic_name: str) -> bool:
     return True
 
 
-lock = Lock()
-
 # def validate_event_id(event_id: str):
 #     pass
 
 # [event1, event2, event3]
 
 
+def _redis_connection():
+    r = Redis(
+        host=getenv("REDIS_HOST", "localhost"),
+        port=int(getenv("REDIS_PORT", "6379")),
+        username=getenv("REDIS_USERNAME", default="default"),
+        password=getenv("REDIS_PASSWORD", default=None),
+        db=int(getenv("REDIS_DB", "0")),
+        connection_pool=None,
+        encoding="utf-8",
+        health_check_interval=0,
+        client_name=None,
+    )
+    return r
+
+
+redis_connection = _redis_connection()
+
+
 async def already_processed(event_id: str):
-    async with lock:
-        done_events: list[str] = []
-        try:
-            with open("done-events.json") as f:
-                done_events = json.load(f)
-                if event_id in done_events:
-                    return True
-                return False
-        except FileNotFoundError:
-            print("Creating done-events.json...")
-            with open("done-events.json", "w") as f:
-                json.dump([], f)
-                return False
+    processed_events = redis_connection.lrange("processed_events", 0, 100)
+    if isinstance(processed_events, Awaitable):
+        processed_events = await processed_events
+    return event_id in processed_events
 
 
 async def mark_processed(event_id: str):
-    async with lock:
-        done_events: list[str] = []
-        with open("done-events.json") as f:
-            done_events = json.load(f)
-            if event_id in done_events:
-                return True
-        done_events.append(event_id)
-        with open("done-events.json", "w") as f:
-            json.dump(done_events, f)
+    redis_connection.lpush("processed_events", event_id)
+    redis_connection.ltrim("processed_events", 0, 100 - 1)
