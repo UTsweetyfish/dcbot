@@ -13,7 +13,6 @@ class DCBot:
     client: AsyncClient
 
     REQUESTER_MAP = {
-        "@alongnice:deepin.org": "alongnice",
         "@avenger_285714:matrix.org": "Avenger-285714",
         "@billchenchina:deepin.org": "UTSweetyfish",
         "@blumia:matrix.org": "BLumia",
