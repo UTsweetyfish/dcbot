@@ -1,12 +1,14 @@
 import asyncio
+import logging
 import os
-import sys
 import time
 from asyncio.subprocess import Process
 
 from nio import AsyncClient, Event, MatrixRoom, RoomMessageText
 
 from dcbot.utils import already_processed, mark_processed, validate_topicname
+
+logger = logging.getLogger(__name__)
 
 
 class DCBot:
@@ -60,19 +62,27 @@ class DCBot:
         if room.room_id != "!arcYMpuEJhIvmonMaG:matrix.org":
             return
         if event.sender not in self.REQUESTER_MAP:
-            print(event.sender)
+            logger.info("Unauthorized sender: %s", event.sender)
             return
         requester = self.REQUESTER_MAP[event.sender]
 
         event_id = event.event_id
 
-        print(
-            f"Message received in room {room.display_name} ({room.room_id})\n"
-            f"{room.user_name(event.sender)} ({event.sender}) | {event.body}"
+        logger.info(
+            "Message received in room %s (%s)\n%s (%s) | %s",
+            room.display_name,
+            room.room_id,
+            room.user_name(event.sender),
+            event.sender,
+            event.body,
         )
 
         if event.body[0] != "/":
-            print("Not a command, ignored.")
+            logger.info(
+                "Not a command, ignored. Event ID: %s, Sender: %s",
+                event.event_id,
+                event.sender,
+            )
 
         command = event.body.split()[0]
         # (package, branch, github_project_name, requester)
@@ -141,9 +151,8 @@ class DCBot:
                 packages += args[2:]
 
         if await already_processed(event_id):
-            print(f"Event {event_id} already processed. Skipping.")
+            logger.info("Event %s already processed. Skipping.", event_id)
             return
-
         if packages:
             if topic:
                 if not topic.startswith("topic-"):
@@ -172,7 +181,7 @@ class DCBot:
 
             results: list[Process] = []
             for package in packages:
-                print(f"Updating {package}")
+                logger.info("Updating %s", package)
                 p = await asyncio.create_subprocess_exec(
                     "python",
                     "-m",
@@ -190,13 +199,13 @@ class DCBot:
 
             for result in results:
                 await result.wait()
-                print(result)
-                print(type(result))
+                logger.info(result)
+                logger.info(type(result))
                 if result.returncode == 0:
                     success_count += 1
                 else:
                     if result.stderr:
-                        print(await result.stderr.read(), file=sys.stderr)
+                        logger.error(await result.stderr.read())
 
             await mark_processed(event_id)
 

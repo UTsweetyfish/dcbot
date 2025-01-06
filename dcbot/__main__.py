@@ -4,6 +4,7 @@ import asyncio
 import atexit
 import getpass
 import json
+import logging
 import os
 import sys
 
@@ -16,6 +17,14 @@ CONFIG_FILE = "credentials.json"
 
 
 # Check out main() below to see how it's done.
+
+
+def setup_logging():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.FileHandler("dcbot.log"), logging.StreamHandler()],
+    )
 
 
 def write_details_to_disk(resp: LoginResponse, homeserver) -> None:
@@ -87,6 +96,9 @@ async def login():
 
 
 async def main() -> None:
+    setup_logging()
+    logger = logging.getLogger(__name__)
+
     # If there are no previously-saved credentials, we'll use the password
     if not os.path.exists(CONFIG_FILE):
         await login()
@@ -94,7 +106,7 @@ async def main() -> None:
     # Otherwise the config file exists, so we'll use the stored credentials
     else:
         # open the file in read-only mode
-        print(f"Loading config file from {CONFIG_FILE}...")
+        logger.info("Loading config file from %s...", CONFIG_FILE)
         async with aiofiles.open(CONFIG_FILE, "r") as f:
             contents = await f.read()
         config = json.loads(contents)
@@ -108,6 +120,7 @@ async def main() -> None:
 
         atexit.register(lambda: asyncio.run(bot.client.close()))
 
+        logger.info("Starting DCBot...")
         await bot.run()
 
     # Either way we're logged in here, too
