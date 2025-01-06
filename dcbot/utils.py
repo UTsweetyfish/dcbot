@@ -31,6 +31,7 @@ def _redis_connection():
         db=int(getenv("REDIS_DB", "0")),
         connection_pool=None,
         encoding="utf-8",
+        decode_responses=True,
         health_check_interval=0,
         client_name=None,
     )
