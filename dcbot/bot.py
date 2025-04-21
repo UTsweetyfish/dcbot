@@ -28,6 +28,8 @@ class DCBot:
         "@telegram_80332535:t2bot.io": "MingcongBai",
         "@yukari:ewe.moe": "YukariChiba",
         "@zengwei:matrix.org": "zengwei00",
+        "@telegram_618469085:t2bot.io": "Cryolitia",
+        "@cryolitia:matrix.org": "Cryolitia",
     }
 
     def __init__(
