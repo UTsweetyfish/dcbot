@@ -91,7 +91,8 @@ def gen_pr_body(old: str, new: str):
         or "X-Time64-Compat" in open(f"{new}/debian/control")
     ):
         body += "## 64-bit time_t transition\n"
-        body += "DCBot assumes this package is already gone through **64-bit time_t** transition.\n"
+        body += "> [!CAUTION]\n"
+        body += "> DCBot assumes this package is already gone through **64-bit time_t** transition.\n"
 
     old_series = []
     new_series = []
