@@ -30,6 +30,7 @@ class DCBot:
         "@zengwei:matrix.org": "zengwei00",
         "@telegram_618469085:t2bot.io": "Cryolitia",
         "@cryolitia:matrix.org": "Cryolitia",
+        "@qaqland:deepin.org": "qaqland",
     }
 
     def __init__(
