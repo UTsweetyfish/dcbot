@@ -64,7 +64,7 @@ class DCBot:
 
         event_id = event.event_id
 
-        if event.body[0] != "/":
+        if event.body[0] not in ["/", "!"]:
             logger.info(
                 "Not a command, ignored. Event ID: %s, Sender: %s",
                 event_id,
@@ -91,13 +91,16 @@ class DCBot:
         )
 
         command = event.body.split()[0]
+        command_prefix = command[0]
+        command = command[1:]
+
         # (package, branch, github_project_name, requester)
         packages = []
         topic = ""
 
-        if command not in {"/update", "/batchupdate"}:
+        if command not in {"update", "batchupdate"}:
             logger.info(
-                "Unsupported command: %s. Event ID: %s, Sender: %s",
+                "Unsupported command: !%s. Event ID: %s, Sender: %s",
                 command,
                 event_id,
                 event.sender,
@@ -160,28 +163,28 @@ class DCBot:
             )
             return
 
-        # /update pkg
-        # /batchupdate topic-xxx pkg1 pkg2 ...
+        # !update pkg
+        # !batchupdate topic-xxx pkg1 pkg2 ...
         args = event.body.split()
 
         match command:
-            case "/update":
+            case "update":
                 # no branch
                 # package
                 # requester
                 # do_update()
-                # /update package
+                # !update package
                 if len(args) != 2:
-                    logger.info("/update should only have one argument. Skipping.")
+                    logger.info("!update should only have one argument. Skipping.")
                     return
                 topic = ""
                 packages = [args[1]]
-            case "/batchupdate":
+            case "batchupdate":
                 # topic, [package, [package, [package, [package, ...]]]]
-                # /update topic-xxx pkg1 pkg2
+                # !batchupdate topic-xxx pkg1 pkg2
                 if len(args) < 3:
                     logger.info(
-                        "/batchupdate should have at least topic-xxx and pkg1. Skipping."
+                        "!batchupdate should have at least topic-xxx and pkg1. Skipping."
                     )
                     return
                 topic = args[1]
@@ -276,6 +279,17 @@ class DCBot:
         else:
             # unreachable
             assert False
+
+        if command_prefix == "/":
+            await self.client.room_send(
+                room.room_id,
+                message_type="m.room.message",
+                content={
+                    "msgtype": "m.text",
+                    "body": "/update or /batchupdate is deprecated, please use !update and !batchupdate",
+                    "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
+                },
+            )
 
     async def run(self, timeout: int = 30000):
         self.client.add_event_callback(self.message_callback, RoomMessageText)
