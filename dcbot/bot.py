@@ -286,7 +286,7 @@ class DCBot:
                 message_type="m.room.message",
                 content={
                     "msgtype": "m.text",
-                    "body": "/update or /batchupdate is deprecated, please use !update and !batchupdate",
+                    "body": f"[DEPRECATED] Please use !{command} instead of /{command}.",
                     "m.relates_to": {"m.in_reply_to": {"event_id": event_id}},
                 },
             )
