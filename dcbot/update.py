@@ -95,7 +95,7 @@ index ad09472..83ef38c 100644
                 "--reject-file=/dev/null",
                 "--forward",
                 "--batch",
-                "--force"
+                "--force",
             ],
             input=diff,
             check=True,
@@ -104,6 +104,7 @@ index ad09472..83ef38c 100644
 
         subprocess.run(
             f'git add {chatOps}',
+            check=True,
             shell=True,
             text=True,
         )
