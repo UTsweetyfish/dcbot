@@ -42,6 +42,69 @@ def cleanup(_dir: str):
     print(f"Cleaning up {_dir}")
     rmtree(_dir)
 
+def set_author():
+    subprocess.check_output(
+        "git config user.name deepin-community-bot[bot]", shell=True
+    )
+    subprocess.check_output(
+        "git config user.email 156989552+deepin-community-bot[bot]@users.noreply.github.com",
+        shell=True,
+    )
+
+def fix_chatOps():
+    chatOps = '.github/workflows/call-chatOps.yml'
+    if not os.path.exists(chatOps):
+        print(
+            f"skipping fix_chatOps because {chatOps} does not exist")
+        return False
+
+    try:
+        diff = '''\
+diff --git a/.github/workflows/call-chatOps.yml b/.github/workflows/call-chatOps.yml
+index ad09472..83ef38c 100644
+--- a/.github/workflows/call-chatOps.yml
++++ b/.github/workflows/call-chatOps.yml
+@@ -6,5 +6,4 @@ on:
+ jobs:
+   chatopt:
+     uses: deepin-community/.github/.github/workflows/chatOps.yml@master
+-    secrets:
+-      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
++    secrets: inherit
+'''
+
+        # Run: patch -p1 --fuzz=0 --no-backup-if-mismatch --reject-file=/dev/null --forward --batch --force
+        subprocess.run(
+            [
+                "patch",
+                "-p1",
+                "--fuzz=0",
+                "--no-backup-if-mismatch",
+                "--reject-file=/dev/null",
+                "--forward",
+                "--batch",
+                "--force"
+            ],
+            input=diff,
+            check=True,
+            text=True,
+        )
+
+        subprocess.run(
+            f'git add {chatOps}',
+            shell=True,
+            text=True,
+        )
+
+        subprocess.run(
+            ["git", "commit", "-m", "chatOps: set secrets to inherit"],
+            text=True,
+            check=True,
+        )
+    except subprocess.SubprocessError:
+        return False
+    return True
+
 
 # old = '/path/to/GIT.OLD'
 # new = '/path/to/GIT.NEW'
@@ -73,8 +136,10 @@ def gen_pr_body(old: str, new: str):
     body += "\n"
 
     potential_transition = False
-    old_package_list = [binary_section["Package"] for binary_section in old_control[1:]]
-    new_package_list = [binary_section["Package"] for binary_section in new_control[1:]]
+    old_package_list = [binary_section["Package"]
+                        for binary_section in old_control[1:]]
+    new_package_list = [binary_section["Package"]
+                        for binary_section in new_control[1:]]
     for package in old_package_list:
         if package == "template-repository":
             continue
@@ -263,6 +328,11 @@ def update(
         ]
     )
 
+    chdir("GIT.OLD")
+    set_author()
+    fix_chatOps()
+    chdir("..")
+
     chdir("SOURCE")
     if m_url:
         subprocess.check_output(
@@ -308,7 +378,8 @@ def update(
     assert not isdir("debian/deepin")
     copytree("../GIT.OLD/.git", ".git")
 
-    subprocess.check_output(["git", "checkout", "--", "debian/deepin", ".github/"])
+    subprocess.check_output(
+        ["git", "checkout", "--", "debian/deepin", ".github/"])
     try:
         subprocess.check_output(["git", "branch", "-D", branch])
     except subprocess.CalledProcessError:
@@ -318,13 +389,7 @@ def update(
     # git commit
 
     subprocess.check_output(["git", "add", "-f", "."])
-    subprocess.check_output(
-        "git config user.name deepin-community-bot[bot]", shell=True
-    )
-    subprocess.check_output(
-        "git config user.email 156989552+deepin-community-bot[bot]@users.noreply.github.com",
-        shell=True,
-    )
+    
     commit_message = f"feat: update {package_name} to {version}"
 
     subprocess.check_output(["git", "commit", "-m", commit_message])
