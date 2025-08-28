@@ -52,10 +52,22 @@ def set_author():
     )
 
 def fix_chatOps():
+
     chatOps = '.github/workflows/call-chatOps.yml'
+
+    # Ensure this is a package
+    if not os.path.isdir('debian') \
+        or not os.path.exists('debian/changelog') \
+        or not os.path.exists('debian/control') \
+        or not os.path.exists('debian/rules'):
+        print(
+            f'Not a package, refuse to update {chatOps}.'
+        )
+        return False
+
     if not os.path.exists(chatOps):
         print(
-            f"skipping fix_chatOps because {chatOps} does not exist")
+            f"Skipping fix_chatOps because {chatOps} does not exist.")
         return False
 
     try:
@@ -100,6 +112,9 @@ index ad09472..83ef38c 100644
             ["git", "commit", "-m", "chatOps: set secrets to inherit"],
             text=True,
             check=True,
+        )
+        subprocess.check_output(
+            ["git", "push"]
         )
     except subprocess.SubprocessError:
         return False
