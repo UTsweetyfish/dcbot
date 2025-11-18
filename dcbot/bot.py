@@ -65,7 +65,7 @@ class DCBot:
 
         event_id = event.event_id
 
-        if event.body[0] not in ["/", "!"]:
+        if not event.body or event.body[0] not in ["/", "!"]:
             logger.info(
                 "Not a command, ignored. Event ID: %s, Sender: %s",
                 event_id,
