@@ -133,9 +133,9 @@ class DCBot:
         # check LAST-UPDATED
         MAX_RETRY_COUNT = 3
         for _ in range(MAX_RETRY_COUNT):
-            if not os.path.exists("LAST-UPDATED"):
-                # sleep and retry
-                await asyncio.sleep(5)  # in seconds
+            if os.path.exists("LAST-UPDATED"):
+                break
+            await asyncio.sleep(5)  # in seconds
 
         # All retries failed, LAST-UPDATED still not exist
         if not os.path.exists("LAST-UPDATED"):
