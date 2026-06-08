@@ -139,6 +139,11 @@ def gen_pr_body(old: str, new: str):
     old_native = "-" not in old_changelog.full_version
     new_native = "-" not in new_changelog.full_version
 
+    if new_changelog.get_version() < old_changelog.get_version():
+        body += "> [!CAUTION]\n"
+        body += f"**DOWNGRADING**\n"
+    elif new_changelog.get_version() == old_changelog.get_version():
+        body += f"Old Version equals New Version\n"
     if old_native != new_native:
         body += "Upstream changed it's package formats. Previous: "
         body += "native" if old_native else "quilt"
