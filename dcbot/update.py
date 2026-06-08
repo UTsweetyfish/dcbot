@@ -133,8 +133,8 @@ def gen_pr_body(old: str, new: str):
 
     body = ""
     body += "## Basic Information\n"
-    body += f"Old Version: {old_changelog.full_version}\n"
-    body += f"New Version: {new_changelog.full_version}\n"
+    body += f"Old Version: `{old_changelog.full_version}`\n"
+    body += f"New Version: `{new_changelog.full_version}`\n"
 
     old_native = "-" not in old_changelog.full_version
     new_native = "-" not in new_changelog.full_version
