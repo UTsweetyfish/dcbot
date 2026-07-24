@@ -33,6 +33,7 @@ class DCBot:
         "@qaqland:deepin.org": "qaqland",
         "@lhdjply:deepin.org": "lhdjply",
         "@tunaichao:deepin.org": "TuNaiChao",
+        "@telegram_5365160570:t2bot.io": "Avenger-285714",
     }
 
     def __init__(
